@@ -1,35 +1,42 @@
 {
-    "version": 6,
-    "cmakeMinimumRequired": {
-        "major": 3,
-        "minor": 20
-    },
+    "version": 10,
     "configurePresets": [
         {
-            "name": "aliu-configure",
-            "displayName": "Aliu Base (Multi-Config)",
-            "generator": "Ninja Multi-Config",
-            "binaryDir": "${sourceDir}/build",
-            "cacheVariables": {
-                "CMAKE_CONFIGURATION_TYPES": "Debug;Release",
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-                "ENABLE_USD": "ON",
-                "USD_ROOT": "/opt/usd"
+            "name": "default_configure",
+            "displayName": "Default Configuration",
+            "hidden": true
+        },
+        {
+            "name": "windows_configure",
+            "inherits": "default_configure",
+            "displayName": "Windows Default Configuration",
+            "binaryDir": "build",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
             }
         }
     ],
     "buildPresets": [
         {
-            "name": "aliu-Debug",
-            "displayName": "Aliu Debug Build",
-            "configurePreset": "aliu-configure",
-            "configuration": "Debug"
-        },
+            "name": "windows_build",
+            "configurePreset": "windows_configure"
+        }
+    ],
+    "workflowPresets": [
         {
-            "name": "aliu-Release",
-            "displayName": "Aliu Release Build",
-            "configurePreset": "aliu-configure",
-            "configuration": "Release"
+            "name": "windows_workflow",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "windows_configure"
+                },
+                {
+                    "type": "build",
+                    "name": "windows_build"
+                }
+            ]
         }
     ]
 }

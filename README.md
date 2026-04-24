@@ -1,9 +1,9 @@
 CUDA C++ Path Tracer for OpenUSD Scenes
 ================
 
-<img src="assets/readme/yugiohClockArc_render.png" width="800">
+<img src="docs/assets/yugiohClockArc_render.png" width="800">
 
-<img src="assets/readme/jelloshelf_preview.webp" width="800">
+<img src="docs/assets/jelloshelf_preview.webp" width="800">
 
 ## Overview
 
@@ -66,22 +66,22 @@ The core algorithms are optimized for **GPU parallelism**, featuring **shared-me
 
 #### `scenes/tentaclePlant.usda`
 
-![tentaclePlant space](assets/readme/tentaclePlant_space.gif)
-![tentaclePlant base](assets/readme/tentaclePlant_base.gif)
+![tentaclePlant space](docs/assets/tentaclePlant_space.gif)
+![tentaclePlant base](docs/assets/tentaclePlant_base.gif)
 
 Beyond the core rendering pipeline, this project focuses on both scene handling and GPU performance optimization.  
 Namely, I wanted to ensure the path tracer supports **direct import of OpenUSD (.usd) scenes**, constructing meshes, validating topology, and computing per-vertex normals to ensure smooth shading across complex assets. This instantly increased the useability of the renderer, allowing previewing of all arbitrary structured USD stages rather than relying on hard-coded JSON spheres and boxes.
 
 #### `scenes/jelloShelf.usda`
 
-![jelloShelf space](assets/readme/jelloShelf_space.gif)
-![jelloShelf base](assets/readme/jelloShelf_base.gif)
+![jelloShelf space](docs/assets/jelloShelf_space.gif)
+![jelloShelf base](docs/assets/jelloShelf_base.gif)
 
 On the computational side, I have implemented from the ground-up parallel algorithms **prefix-scan**, **stream compaction**, and **radix sort**, featuring **shared memory** for quicker read / writes to buffers and comparable performance to external libraries such as Thrust. These operations form the foundation of the pathtracer's work-efficient rendering, allowing 1. rays with no scene intersection or early termination to be compacted away, and 2. remaining paths to be grouped by material type for improved warp coherence.
 
 #### `scenes/dragon.usda` with smooth mesh and diffuse shading
 
-<img src="assets/readme/dragon_smooth_diffuse.png" width="400">
+<img src="docs/assets/dragon_smooth_diffuse.png" width="400">
 
 Together, these extensions make the renderer flexible in the scenes it can process and optimal in the way it makes use of GPU parallel kernel calls.
 
@@ -109,13 +109,13 @@ flowchart TB
 
 Custom CUDA kernels implement **intra-block shared-memory scans** (`kernel_scanIntraBlockShared`) and **block-sum aggregation** (`kernel_addBlockSums`) to efficiently scan and compact terminated paths and keep active rays contiguous in memory.
 
-![scan performance](assets/readme/sort_performance.png)
+![scan performance](docs/assets/sort_performance.png)
 
-![compaction performance](assets/readme/compaction_performance.png)
+![compaction performance](docs/assets/compaction_performance.png)
 
 Following compaction in the pathtracer, an **integer-keyed radix sort** groups remaining paths by material type. This approach increases shading coherence by allowing rays with identical BSDF types to execute within the same warp, reducing idle threads and unnecessary divergence in the shading kernel.
 
-![radix sort performance](assets/readme/sort_performance.png)
+![radix sort performance](docs/assets/sort_performance.png)
 
 Notably, it was difficult to match Thrust baselines with radix sort. Future development involves a GUI flag to switch in Thrust functions for possible speed improvement.
 
@@ -125,7 +125,7 @@ As stream compaction was used in the pathtracer to early terminate any rays that
 
 From the graph below, you can see that exponentially more rays will terminate early when looking at an open space scene (refer to [here](#scenesjelloshelfusda) for example of open vs closed scene) as compared to the equivalent model rendered in a closed space scene.
 
-![open vs closed unterminated rows](assets/readme/stream_compaction_open_vs_closed.png)
+![open vs closed unterminated rows](docs/assets/stream_compaction_open_vs_closed.png)
 
 Looking at just the first two bounces for each is even more informative.
 
@@ -207,15 +207,15 @@ By later bounces, GPU workload drops across all kernels, confirming that compact
 
 Then, comparing the different metrics between the kernels is done via stacked bar charts, allowing us to visualize how much resources are dedicated to each process for every bounce.
 
-![stacked compute](assets/readme/stacked_compute.png)
+![stacked compute](docs/assets/stacked_compute.png)
 
-![stacked memory](assets/readme/stacked_memory.png)
+![stacked memory](docs/assets/stacked_memory.png)
 
-![stacked time](assets/readme/stacked_time.png)
+![stacked time](docs/assets/stacked_time.png)
 
 **Note**, the `computeIntersections` kernel heavily dominates the execution in runtime. This is also obvious in the Nsight interface here:
 
-<img src="assets/readme/nsight_compute_computeIntersections_bottleneck.png" height="600">
+<img src="docs/assets/nsight_compute_computeIntersections_bottleneck.png" height="600">
 
 Optimizations are planned to eliminate this bottleneck in performance, such as implementing BVH, which will create a means to traverse the scene geometry through tree-like searching rather than 1D brute-force searching.
 
@@ -254,13 +254,13 @@ build/bin/Release/cuda_path_tracer
 
 If the application window looks like this after loading the default scene, you are good to go!
 
-<img src="assets/readme/default_scene_checker.png" width="600">
+<img src="docs/assets/default_scene_checker.png" width="600">
 
 Also, the included files `CMakePresets.json`, `Makefile`, and the `.vscode` folder may be helpful to exemplify the runbook.
 
 ## IMGUI Overview
 
-![gui preview](assets/readme/GUI_window_preview.png)
+![gui preview](docs/assets/GUI_window_preview.png)
 
 The renderer includes a lightweight ImGui control panel for inspecting scene state, performance metrics, and material-sorting behavior during rendering.
 
@@ -275,7 +275,7 @@ The renderer includes a lightweight ImGui control panel for inspecting scene sta
 
 The normals view will look like this:
 
-<img src="assets/readme/normals_preview.png" width="600">
+<img src="docs/assets/normals_preview.png" width="600">
 
 ## TODO
 
